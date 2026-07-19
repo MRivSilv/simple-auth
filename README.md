@@ -1,18 +1,18 @@
 # simple-auth
 
-API de autenticación centralizada tipo "FusioAuth casero". Emite y valida tokens JWT asimétricos (RS256) para que múltiples proyectos compartan un mismo sistema de usuarios.
+Centralized auth API — a homegrown "FusioAuth-like" service. Issues and validates RS256 JWT tokens so multiple projects can share a single user system.
 
-## Arquitectura
+## Architecture
 
 ```
                     ┌──────────────┐
-                    │  FusioAuth   │
+                    │  simple-auth │
                     │ (private.pem)│
                     └──────┬───────┘
                            │ login
                            ▼
   ┌──────────────┐  JWT   ┌──────────────┐
-  │   App A      │◄───────│   Usuario    │
+  │   App A      │◄───────│   User       │
   │ (public.pem) │        └──────────────┘
   └──────────────┘
   ┌──────────────┐
@@ -21,43 +21,43 @@ API de autenticación centralizada tipo "FusioAuth casero". Emite y valida token
   └──────────────┘
 ```
 
-- **FusioAuth** tiene `private.pem` + `public.pem` → firma tokens
-- **Cada app** tiene solo `public.pem` → verifica tokens sin depender de FusioAuth en cada request
+- **simple-auth** holds `private.pem` + `public.pem` → signs tokens
+- **Each app** only gets `public.pem` → validates tokens without calling the auth server on every request
 
 ## Endpoints
 
-| Método | Ruta | Descripción |
+| Method | Path | Description |
 |--------|------|-------------|
-| POST | `/register` | Crear usuario |
-| POST | `/login` | Iniciar sesión, devuelve JWT |
-| GET | `/protected` | Ejemplo de ruta protegida con JWT |
+| POST | `/register` | Create a user |
+| POST | `/login` | Authenticate, returns JWT |
+| GET | `/protected` | Example protected route (requires JWT) |
 
-## Uso
+## Usage
 
-### 1. Generar llaves (ya incluidas en `keys/`)
+### 1. Generate keys (already included in `keys/`)
 
 ```bash
 openssl genpkey -algorithm RSA -out keys/private.pem -pkeyopt rsa_keygen_bits:2048
 openssl pkey -in keys/private.pem -pubout -out keys/public.pem
 ```
 
-### 2. Configurar entorno
+### 2. Configure environment
 
 ```env
 JWT_PRIVATE_KEY=keys/private.pem
 JWT_PUBLIC_KEY=keys/public.pem
 ```
 
-### 3. Iniciar
+### 3. Start
 
 ```bash
 go run main.go
 ```
 
-### 4. Probar
+### 4. Try it
 
 ```bash
-# Registrar
+# Register
 curl -X POST http://localhost:8080/register \
   -d '{"username":"demo","password":"secreta","email":"demo@test.com"}'
 
@@ -65,13 +65,13 @@ curl -X POST http://localhost:8080/register \
 TOKEN=$(curl -s -X POST http://localhost:8080/login \
   -d '{"username":"demo","password":"secreta"}' | jq -r .token)
 
-# Ruta protegida
+# Protected route
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/protected
 ```
 
-## Integrar en otra app
+## Integrating into another app
 
-Copia `keys/public.pem` en tu proyecto. Usa el mismo código de validación (o el cliente HTTP que prefieras):
+Copy `keys/public.pem` to your project. Validate tokens locally:
 
 ```go
 import "github.com/golang-jwt/jwt/v5"
@@ -90,23 +90,23 @@ func validateToken(tokenStr string) (*jwt.Token, error) {
 }
 ```
 
-## Pendiente / Por desarrollar
+## Roadmap / TODO
 
-- [ ] **Base de datos persistente** — reemplazar store en memoria por PostgreSQL, MySQL o SQLite
-- [ ] **Refresh tokens** — token de corta duración + refresh token rotable
-- [ ] **Scopes / permisos** — claim `scope` en el JWT para autorización granular por proyecto
-- [ ] **Roles de usuario** — admin, moderador, etc.
-- [ ] **Revocación de tokens** — blacklist en Redis o DB
-- [ ] **Email verification** — confirmar cuenta antes de poder loguearse
-- [ ] **Recuperación de contraseña** — reset por email
-- [ ] **Rate limiting** — evitar bruteforce en login/register
-- [ ] **CORS** — permitir requests desde múltiples dominios (esencial para multi-proyecto)
-- [ ] **Validación de entrada** — sanitizar email, username, password strength
-- [ ] **Manejo de errores consistente** — códigos HTTP y mensajes uniformes
-- [ ] **Logging estructurado** — en lugar de log.Println
+- [ ] **Persistent database** — replace in-memory store with PostgreSQL, MySQL or SQLite
+- [ ] **Refresh tokens** — short-lived access token + rotatable refresh token
+- [ ] **Scopes / permissions** — `scope` claim in JWT for granular per-project authorization
+- [ ] **User roles** — admin, moderator, etc.
+- [ ] **Token revocation** — blacklist via Redis or database
+- [ ] **Email verification** — confirm account before login
+- [ ] **Password reset** — email-based recovery
+- [ ] **Rate limiting** — prevent brute force on login/register
+- [ ] **CORS** — allow requests from multiple domains (essential for multi-project setups)
+- [ ] **Input validation** — sanitize email, username, enforce password strength
+- [ ] **Consistent error handling** — uniform HTTP codes and error messages
+- [ ] **Structured logging** — replace log.Println
 - [ ] **Health check** — `GET /health`
-- [ ] **Graceful shutdown** — capturar SIGTERM/SIGINT
-- [ ] **HTTPS** — certificados TLS
-- [ ] **Pruebas** — tests unitarios y de integración
-- [ ] **Dockerfile / docker-compose** — para despliegue rápido
-- [ ] **API keys para servicios** — autenticación máquina-a-máquina
+- [ ] **Graceful shutdown** — handle SIGTERM/SIGINT
+- [ ] **HTTPS** — TLS certificates
+- [ ] **Tests** — unit and integration tests
+- [ ] **Dockerfile / docker-compose** — easy deployment
+- [ ] **API keys for services** — machine-to-machine authentication
