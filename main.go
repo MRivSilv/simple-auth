@@ -20,6 +20,7 @@ func main(){
 	mux.HandleFunc("GET /protected", handlers.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("You are in"))
 	}))
+	mux.HandleFunc("DELETE /account", handlers.RequireAuth(handlers.DeleteUser(userStore)))
 
 	log.Println("RUNNING on localhost:8080/")
 	log.Fatal(http.ListenAndServe(":8080", mux))
