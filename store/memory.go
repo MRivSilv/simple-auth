@@ -29,3 +29,13 @@ func (s *UserStore) Get(username string) (string, bool) {
 	hash, ok  := s.users[username]
 	return hash, ok
 }
+
+func (s *UserStore) Delete(username string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, exists := s.users[username]; !exists {
+		return false
+	}
+	delete(s.users, username)
+	return true
+}

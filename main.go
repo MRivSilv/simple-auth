@@ -21,6 +21,6 @@ func main(){
 		w.Write([]byte("You are in"))
 	}))
 
-	log.Println("listening on :8080")
+	log.Println("RUNNING on localhost:8080/")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
