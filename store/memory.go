@@ -23,10 +23,10 @@ func (s *UserStore) Create(username, hash string) bool{
 	return true
 }
 
-func (s *UserStore) Get(username string) (string, bool) {
+func (s *UserStore) Get(UserID string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	hash, ok  := s.users[username]
+	hash, ok  := s.users[UserID]
 	return hash, ok
 }
 
