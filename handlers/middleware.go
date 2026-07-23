@@ -28,13 +28,13 @@ func RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-		username, ok := claims["sub"].(string)
+		userid, ok := claims["sub"].(string)
 		if !ok {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userContextKey, username)
+		ctx := context.WithValue(r.Context(), userContextKey, userid)
 		next(w, r.WithContext(ctx))
 	}
 }

@@ -1,18 +1,32 @@
 package main
 
-import ( 
+import (
+	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"simple-auth/handlers"
 	"simple-auth/store"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
-func main(){
+func main() {
 	godotenv.Load()
-	userStore := store.NewUserStore()
+
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("failed to open database: ", err)
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		log.Fatal("failed to ping database: ", err)
+	}
+
+	userStore := store.NewUserStore(db)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /register", handlers.Register(userStore))

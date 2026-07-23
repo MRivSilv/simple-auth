@@ -1,37 +1,29 @@
 package handlers
 
-import ( 
-	"encoding/json"
+import (
 	"net/http"
 	"simple-auth/store"
 )
 
-func DeleteUser (s *store.UserStore) http.HandlerFunc{
-	return func(w http.ResponseWriter, r *http.Request){
+func DeleteUser(s *store.UserStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		userid, ok := r.Context().Value(userContextKey).(string)
 		if !ok {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		var body struct{
-			UserID string `json:"UserID"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			http.Error(w, "bad request", http.StatusBadRequest)
-			return
-		}
-
-		_, exists := s.Get(userid)
-		if !exists {
+		_, err := s.Get(userid)
+		if err != nil {
 			http.Error(w, "invalid credentials", http.StatusUnauthorized)
 			return
 		}
 
-		if !s.Delete(userid) {
-			http.Error(w, "user not found", http.StatusNotFound)
+		_, err = s.Delete(userid)
+		if err != nil {
+			http.Error(w, "error deleting user", http.StatusInternalServerError)
+			return
 		}
-
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
