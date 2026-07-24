@@ -8,20 +8,19 @@ import (
 )
 
 type Credentials struct {
-	AppID    string `json:"appid"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-func Register(s *store.UserStore) http.HandlerFunc {
+func RegisterUser(s *store.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var creds Credentials
 		if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
 			http.Error(w, "server error", http.StatusBadRequest)
 			return
 		}
-		if creds.Email == "" || creds.Password == "" || creds.Username == "" || creds.AppID == "" {
+		if creds.Email == "" || creds.Password == "" || creds.Username == "" {
 			http.Error(w, "credential is missing", http.StatusBadRequest)
 			return
 		}
@@ -31,7 +30,7 @@ func Register(s *store.UserStore) http.HandlerFunc {
 			return
 		}
 
-		_, err = s.Create(creds.Email, creds.Username, hash, creds.AppID)
+		_, err = s.CreateUser(creds.Email, creds.Username, hash)
 		if err != nil {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return

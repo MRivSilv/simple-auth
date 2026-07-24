@@ -7,14 +7,14 @@ import (
 	"simple-auth/store"
 )
 
-func Login (s *store.UserStore) http.HandlerFunc {
+func Login (s *store.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request){
 		var creds Credentials
 		if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
-		user, err := s.GetByEmail(creds.Email)
+		user, err := s.GetUserByEmail(creds.Email)
 		if err != nil {
 			http.Error(w, "User not found", http.StatusUnauthorized)
 			return

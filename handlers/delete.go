@@ -5,7 +5,7 @@ import (
 	"simple-auth/store"
 )
 
-func DeleteUser(s *store.UserStore) http.HandlerFunc {
+func DeleteUser(s *store.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userid, ok := r.Context().Value(userContextKey).(string)
 		if !ok {
@@ -13,13 +13,13 @@ func DeleteUser(s *store.UserStore) http.HandlerFunc {
 			return
 		}
 
-		_, err := s.Get(userid)
+		_, err := s.GetUser(userid)
 		if err != nil {
 			http.Error(w, "invalid credentials", http.StatusUnauthorized)
 			return
 		}
 
-		_, err = s.Delete(userid)
+		_, err = s.DeleteUser(userid)
 		if err != nil {
 			http.Error(w, "error deleting user", http.StatusInternalServerError)
 			return

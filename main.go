@@ -26,10 +26,10 @@ func main() {
 		log.Fatal("failed to ping database: ", err)
 	}
 
-	userStore := store.NewUserStore(db)
+	userStore := store.NewStore(db)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /register", handlers.Register(userStore))
+	mux.HandleFunc("POST /register-user", handlers.RegisterUser(userStore))
 	mux.HandleFunc("POST /login", handlers.Login(userStore))
 	mux.HandleFunc("GET /protected", handlers.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("You are in"))
