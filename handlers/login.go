@@ -7,8 +7,8 @@ import (
 	"simple-auth/store"
 )
 
-func Login (s *store.Storage) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request){
+func Login(s *store.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		var creds Credentials
 		if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
 			http.Error(w, "bad request", http.StatusBadRequest)
@@ -19,12 +19,12 @@ func Login (s *store.Storage) http.HandlerFunc {
 			http.Error(w, "User not found", http.StatusUnauthorized)
 			return
 		}
-		if !auth.CheckPassword(user.Hash, creds.Password){
+		if !auth.CheckPassword(user.Hash, creds.Password) {
 			http.Error(w, "invalid credentials", http.StatusUnauthorized)
 			return
 		}
 		token, err := auth.GenerateToken(user.UserID)
-		if err != nil{
+		if err != nil {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}

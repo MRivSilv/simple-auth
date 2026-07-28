@@ -31,6 +31,7 @@ func CreateApp(s *store.Storage) http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 	}
 }
+
 //TODO: DELETE APP
 
 //TODO: EDIT APP
