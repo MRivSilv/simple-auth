@@ -29,11 +29,14 @@ func main() {
 	userStore := store.NewStore(db)
 
 	mux := http.NewServeMux()
+	//POST
 	mux.HandleFunc("POST /register-user", handlers.RegisterUser(userStore))
 	mux.HandleFunc("POST /login", handlers.Login(userStore))
+	//GET
 	mux.HandleFunc("GET /protected", handlers.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("You are in"))
 	}))
+	//DELETE
 	mux.HandleFunc("DELETE /account", handlers.RequireAuth(handlers.DeleteUser(userStore)))
 
 	log.Println("RUNNING on localhost:8080/")
